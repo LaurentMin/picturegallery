@@ -13,24 +13,27 @@ else{
     $username = $_POST['username'];
     $password = $_POST['pass'];
 
-    $sql1 = "SELECT users_username, users_password FROM users WHERE users_username = '{$username}' AND users_password = '{$password}'";
+    $sql1 = "SELECT users_username, users_password FROM users WHERE users_username = ? AND users_password = ?";
+	if ($stmt = mysqli_prepare($connection, $sql1)) {
+        mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
-    $result = mysqli_query ($connection, $sql1) or die (mysqli_error ($connection));
-
-    if (mysqli_num_rows ($result) > 0){
-        while ($row = mysqli_fetch_assoc ($result)){
-            $_SESSION['username'] = $row['users_username'];
-            include 'includes/navbar.html';
-            include 'includes/logged.php';
-            
-	 
-        }
-    }
-    else{
-        include 'includes/navbar.html';
-        include 'includes/notlogged.php';
-        
-    }
+	    if (mysqli_num_rows ($result) > 0){
+	        while ($row = mysqli_fetch_assoc ($result)){
+	            $_SESSION['username'] = $row['users_username'];
+	            include 'includes/navbar.html';
+	            include 'includes/logged.php';
+	        }
+	    }
+	    else{
+	        include 'includes/navbar.html';
+	        include 'includes/notlogged.php';
+	        
+	    }
+	} else {
+		die(mysqli_error($connection));
+	}
 }
 
 mysqli_close($connection);
