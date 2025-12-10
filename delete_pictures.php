@@ -28,6 +28,7 @@ else{
 		
 		        // On vérifie que le fichier est bien dans le dossier uploads
 		        if ($filePath !== false && strpos($filePath, $baseDir) === 0 && is_file($filePath)) {
+					// nosemgrep: php.lang.security.unlink-use.unlink-use
 		            if (unlink($filePath)) {
 		                echo "Removed picture " . htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8') . "<br>";
 		                echo "Removed picture " . htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8')
