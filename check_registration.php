@@ -17,7 +17,8 @@ else{
     $password = $_POST['pass'];
 
 
-    $sql1 = "SELECT users_username, users_password FROM users WHERE users_username = '{$username}' AND users_password = '{$password}'";
+    $sql1 = "SELECT users_username, users_password FROM users WHERE users_username = ? AND users_password = ?";
+	
     $sql2 = "INSERT INTO users (users_username, users_password) VALUES (:username, :password)";
 	$stmt = $pdo->prepare($sql);
 	$stmt->execute([
@@ -25,7 +26,21 @@ else{
 	    ':password' => $password
 	]);
 
-    $result1 = mysqli_query ($connection, $sql1) or die (mysqli_error ($connection));
+    if ($stmt = mysqli_prepare($connection, $sql1)) {
+	    mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+	    mysqli_stmt_execute($stmt);
+    	$result1 = mysqli_stmt_get_result($stmt);
+
+	    if ($row = mysqli_fetch_assoc($result1)) {
+	        echo "Utilisateur : " . $row['users_username'];
+	    } else {
+	        echo "Erreur d'identifiants";
+	    }
+	
+	    mysqli_stmt_close($stmt);
+	} else {
+	    die(mysqli_error($connection));
+	}
 
     if (mysqli_num_rows ($result1) == 0){
         if (mysqli_query ($connection, $sql2)){
