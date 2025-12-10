@@ -27,6 +27,7 @@ else{
 	            }
 			}
         }
+		mysqli_stmt_close($stmt);
     }
     
     $sql1 = "SELECT users.users_username, pictures.pictures_name FROM pictures INNER JOIN users ON pictures.id_users = users.users_id";
