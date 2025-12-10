@@ -17,16 +17,32 @@ else{
         
         $sql2 = "DELETE FROM pictures WHERE pictures_name = ?";
 		mysqli_stmt_bind_param($stmt, "s", $pictures_name);
-        if (mysqli_stmt_execute($stmt)){
-			if (mysqli_stmt_affected_rows($stmt) > 0) {
-            	$path = "uploads/" . $pictures_name;
-	            if (unlink ($path)){
-	                echo "Removed picture " . $path . "<br>";
-	                echo "Removed picture " . $pictures_name . ", continue with  " . "<a href=''>" . "deleting pictures" . "</a>";
-	                unset ($path);
-	            }
-			}
+        if (mysqli_stmt_execute($stmt)) {
+            if (mysqli_stmt_affected_rows($stmt) > 0) {
+
+                // Répertoire autorisé
+                $baseDir  = realpath(__DIR__ . '/uploads');
+                // On retire d’éventuels chemins "../" et on force dans uploads
+                $fileName = basename($pictures_name);
+                $filePath = realpath($baseDir . DIRECTORY_SEPARATOR . $fileName);
+
+                // On vérifie que le fichier est bien dans le dossier uploads
+                if ($filePath !== false && strpos($filePath, $baseDir) === 0 && is_file($filePath)) {
+                    if (unlink($filePath)) {
+                        echo "Removed picture " . htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8') . "<br>";
+                        echo "Removed picture " . htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8')
+                            . ", continue with <a href=''>deleting pictures</a>";
+                    } else {
+                        echo "Error while deleting picture.<br>";
+                    }
+                } else {
+                    echo "Invalid or unauthorized file path.<br>";
+                }
+
+                unset($filePath);
+            }
         }
+
     }
     
     $sql1 = "SELECT users.users_username, pictures.pictures_name FROM pictures INNER JOIN users ON pictures.id_users = users.users_id";
